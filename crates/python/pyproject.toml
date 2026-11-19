@@ -1,0 +1,20 @@
+[build-system]
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
+
+[project]
+name = "ladders"
+requires-python = ">=3.9"
+dynamic = ["version"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+# Every function starts on a 64-byte boundary. Without this the speed of a build depends on where
+# its hot functions happen to land: of eight builds of one source on x86_64, half ran a large
+# self-join 12% to 16% slower than the others; with it eight builds agreed within 0.6%, at the fast
+# level. The profile is fat LTO, so the final rustc call generates every function and the flag
+# reaches them all. Output bits do not depend on it.
+rustc-args = ["-C", "llvm-args=-align-all-functions=6"]
+# The native module sits inside the Python package, next to the STUMPY drop-in.
+python-source = "python"
+module-name = "ladders._native"

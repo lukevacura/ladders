@@ -1,0 +1,13 @@
+error[E0369]: binary operation `<` cannot be applied to type `ladde::entry::Entry`
+ --> tests/compile-fail/entry_not_ord.rs:8:15
+  |
+8 |     let _ = a < b;
+  |             - ^ - ladde::entry::Entry
+  |             |
+  |             ladde::entry::Entry
+  |
+note: `ladde::entry::Entry` does not implement `PartialOrd`
+ --> src/entry.rs
+  |
+  | pub struct Entry {
+  | ^^^^^^^^^^^^^^^^ `ladde::entry::Entry` is defined in another crate

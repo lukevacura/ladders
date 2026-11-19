@@ -1,0 +1,27 @@
+[package]
+name = "ladders-python"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+name = "ladders"
+crate-type = ["cdylib"]
+# A test binary would need libpython at run time; the bindings are tested from Python instead.
+test = false
+bench = false
+doctest = false
+
+[features]
+# Hidden hooks the Python tests use to prove ordering properties (the GIL is released); never in a release wheel.
+test-hooks = []
+
+[dependencies]
+ladde = { path = "../core", features = ["parallel"] }
+numpy = "0.30"
+pyo3 = { version = "0.30", features = ["abi3-py39"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(loom)"] }

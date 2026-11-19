@@ -1,0 +1,28 @@
+# cargo-nextest runs every test in its own process; doc tests stay on `cargo test --doc`.
+nextest-version = { required = "0.9.100" }
+experimental = ["wrapper-scripts"]
+
+[profile.default]
+# Every passing test prints a PASS line: a coverage check over the run's output reads them.
+status-level = "pass"
+final-status-level = "slow"
+failure-output = "immediate-final"
+# A slow test is reported, never killed: the memory and time cap of the run is the only limit.
+slow-timeout = { period = "60s" }
+# Retries would hide a flaky test.
+retries = 0
+
+# nextest puts each test in a process group of its own, which a memory cap on the run's process
+# group cannot see or kill. The wrapper moves the test back into
+# nextest's own group before it starts, so the cap covers every test and whatever it spawns.
+[scripts.wrapper.same-group]
+command = [
+  "perl",
+  "-e",
+  'setpgrp(0, getpgrp(getppid())) or die "nextest same-group: setpgid: $!\n"; exec { $ARGV[0] } @ARGV or die "nextest same-group: exec $ARGV[0]: $!\n"',
+]
+
+[[profile.default.scripts]]
+platform = "cfg(unix)"
+filter = "all()"
+run-wrapper = "same-group"

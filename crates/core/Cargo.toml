@@ -1,0 +1,76 @@
+[package]
+name = "ladde"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+# Not on crates.io yet.
+publish = false
+
+[dependencies]
+libm = "=0.2.16"
+# 256-bit signed integer for the exact oracle only (`oracle` feature); `no_std`, MIT/Apache-2.0.
+ethnum = { version = "1.5", optional = true, default-features = false }
+# The generator trait only, for `scrump::Shuffled` to draw its order from the caller's own
+# `RngCore`; `no_std`, MIT/Apache-2.0.
+rand_core = { version = "0.9", optional = true, default-features = false }
+
+[features]
+# The exact reference implementations (`naive`), for tests, benches and tooling only.
+# Off by default: release builds and the Python wheel never contain them.
+oracle = ["dep:ethnum", "std"]
+# Every `rand_core::RngCore` is a `scrump::RandomSource`. Off by default: the core has no
+# dependency without it, and `SplitMix64` stays the seeded default whose orders are fixed.
+rand = ["dep:rand_core"]
+# The standard library, for runtime CPU feature detection: without it, or without a compile-time
+# `avx2`, `x86_64` runs the scalar row passes. Off by default, so the core stays `no_std`.
+std = []
+# Scoped threads for batch work (`par`): needs `std`, so the core stays `no_std` without it.
+# Off by default in the Rust crate; the Python wheel turns it on.
+parallel = ["std"]
+
+[target.'cfg(loom)'.dependencies]
+loom = "0.7"
+[target.'cfg(shuttle)'.dependencies]
+shuttle = "0.9"
+
+[dev-dependencies]
+# Arbitrary-width reference for the wide integer and the cold route's exact tests.
+num-bigint = "=0.4.8"
+proptest = "1.12"
+rand_xorshift = "0.4"
+testkit = { path = "../testkit" }
+trybuild = "1"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(loom)", "cfg(shuttle)"] }
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+undocumented_unsafe_blocks = "deny"
+
+[[bench]]
+name = "row"
+harness = false
+
+[[bench]]
+name = "kernel_neon"
+harness = false
+
+[[bench]]
+name = "batch"
+harness = false
+
+[[bench]]
+name = "grow_shift"
+harness = false
+
+[[bench]]
+name = "spill"
+harness = false
+
+# Scratch comparison of the hot kernel's estimate-and-sweep strategies; `test` runs its
+# equality checks against the production kernel.
+[[example]]
+name = "kernel_strategy"
+test = true

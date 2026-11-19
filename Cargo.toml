@@ -1,0 +1,27 @@
+[workspace]
+resolver = "3"
+members = ["crates/core", "crates/testkit", "crates/python"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+license = "MIT"
+
+# Dependencies and the library under test build optimized in debug test runs; debug-assertions
+# and overflow-checks stay on, so the checks themselves are unchanged.
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.dev.package.ladde]
+opt-level = 1
+
+[profile.dev.package.testkit]
+opt-level = 1
+
+# The profile speed is measured on is the one that ships (the Python wheel builds with it too).
+# Panics stay unwinding: scoped-thread panic propagation and the Python bindings rely on it.
+[profile.release]
+codegen-units = 1
+lto = "fat"
+panic = "unwind"

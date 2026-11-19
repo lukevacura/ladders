@@ -1,0 +1,7 @@
+error[E0277]: the trait bound `MeanDistance: From<f64>` is not satisfied
+ --> tests/compile-fail/mean_distance_from_f64.rs:4:34
+  |
+4 |     let _: MeanDistance = 1.0f64.into();
+  |                                  ^^^^ the trait `From<f64>` is not implemented for `MeanDistance`
+  |
+  = note: required for `f64` to implement `Into<MeanDistance>`

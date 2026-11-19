@@ -1,0 +1,22 @@
+[package]
+name = "testkit"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+proptest = "1"
+ladde = { path = "../core", features = ["oracle"] }
+
+[dev-dependencies]
+criterion = "0.8"
+num-bigint = "=0.4.8"
+num-rational = "=0.4.2"
+[[bench]]
+name = "representation"
+harness = false
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(loom)", "cfg(shuttle)"] }
